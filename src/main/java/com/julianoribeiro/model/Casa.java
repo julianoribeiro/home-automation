@@ -1,16 +1,27 @@
 package com.julianoribeiro.model;
 
+import org.springframework.stereotype.Component;
+
+import com.pi4j.io.gpio.GpioController;
+import com.pi4j.io.gpio.GpioFactory;
+import com.pi4j.io.gpio.GpioPinDigitalOutput;
+import com.pi4j.io.gpio.PinState;
+import com.pi4j.io.gpio.RaspiPin;
+
+@Component
 public class Casa {
 	
 	private int temperatura;
 	private int lumens;
 	
-	public Casa() {};
-	
-	public Casa(int temp, int luz) {
-		this.lumens = luz;
-		this.temperatura = temp;
-	}
+	private StatusSensor cooler;
+
+    GpioController gpio = GpioFactory.getInstance();
+    GpioPinDigitalOutput pinLed;
+
+	public Casa() {
+		pinLed = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_06, "MyLED", PinState.LOW);
+	};
 	
 	public int getTemperatura() {
 		return temperatura;
@@ -18,6 +29,33 @@ public class Casa {
 	
 	public int getLumens() {
 		return lumens;
+	}
+	
+	public StatusSensor getStatusLampada() {
+		if (pinLed.isHigh()) {
+			return StatusSensor.ON;
+		} else {
+			return StatusSensor.OFF;
+		}
+	}
+	
+	public StatusSensor getStatusCooler() {
+		return this.cooler;
+	}
+
+	public void setLampada(StatusSensor lampada) {
+
+		if (StatusSensor.ON.equals(lampada)) {
+			pinLed.high();
+		} else {
+			pinLed.low();
+		}
+		
+//		this.lampada = lampada;
+	}
+
+	public void setCooler(StatusSensor cooler) {
+		this.cooler = cooler;
 	}
 
 }

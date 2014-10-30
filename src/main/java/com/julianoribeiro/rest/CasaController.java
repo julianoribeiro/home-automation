@@ -1,20 +1,29 @@
 package com.julianoribeiro.rest;
 
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.julianoribeiro.model.Casa;
+import com.julianoribeiro.model.StatusSensor;
 
 @Controller
 public class CasaController {
+	
+	@Autowired
+	private Casa minhaCasa;
 
 	@RequestMapping(value="/casa")
-	@ResponseStatus(value = HttpStatus.OK)
 	public @ResponseBody Casa getCasa() {
-		return new Casa(12, 20);
+		return minhaCasa;
+	}
+	
+	@RequestMapping(value="/casa/lampada/{status}")
+	public @ResponseBody Casa setLampada(@PathVariable String status) {
+		minhaCasa.setLampada(StatusSensor.valueOf(status));
+		return minhaCasa;
 	}
 	
 }
