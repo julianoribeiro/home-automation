@@ -4,28 +4,24 @@ import org.springframework.stereotype.Component;
 
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
+import com.pi4j.io.gpio.GpioPinDigitalInput;
 import com.pi4j.io.gpio.GpioPinDigitalOutput;
+import com.pi4j.io.gpio.PinPullResistance;
 import com.pi4j.io.gpio.PinState;
 import com.pi4j.io.gpio.RaspiPin;
 
 @Component
 public class Casa {
 	
-	private int temperatura;
 	private int lumens;
 	
-	private StatusSensor cooler;
-
     GpioController gpio = GpioFactory.getInstance();
     GpioPinDigitalOutput pinLed;
 
 	public Casa() {
 		pinLed = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_06, "MyLED", PinState.LOW);
+//		pinLdr = gpio.provisionDigitalInputPin(RaspiPin.GPIO_02, PinPullResistance.OFF);
 	};
-	
-	public int getTemperatura() {
-		return temperatura;
-	}
 	
 	public int getLumens() {
 		return lumens;
@@ -39,10 +35,6 @@ public class Casa {
 		}
 	}
 	
-	public StatusSensor getStatusCooler() {
-		return this.cooler;
-	}
-
 	public void setLampada(StatusSensor lampada) {
 
 		if (StatusSensor.ON.equals(lampada)) {
@@ -50,12 +42,28 @@ public class Casa {
 		} else {
 			pinLed.low();
 		}
-		
-//		this.lampada = lampada;
 	}
+	
+	public String getMessage() {
+		
+		StringBuffer sb = new StringBuffer();
+	
+		GpioPinDigitalOutput pinLdrOut = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_02);
+		pinLdrOut.setState(PinState.LOW);
+		gpio.unprovisionPin(pinLdrOut);
+		
+		int valor = 0;
 
-	public void setCooler(StatusSensor cooler) {
-		this.cooler = cooler;
+		GpioPinDigitalInput pinLdrIn = gpio.provisionDigitalInputPin(RaspiPin.GPIO_02, PinPullResistance.OFF);
+
+		while (pinLdrIn.isLow()) {
+			valor++;
+		}
+		gpio.unprovisionPin(pinLdrIn);
+		
+		sb.append("[valor: ").append(valor).append("]");
+		
+		return sb.toString();
 	}
 
 }
